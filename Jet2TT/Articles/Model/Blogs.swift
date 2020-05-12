@@ -11,7 +11,7 @@ import Foundation
 typealias Blogs = [Blog]
 
 // MARK: - Blog
-struct Blog: Codable {
+struct Blog: Codable, Hashable {
     let id: String
     let createdAt: String
     let content: String
@@ -32,7 +32,7 @@ struct Blog: Codable {
 }
 
 // MARK: - Media
-struct Media: Codable {
+struct Media: Codable, Hashable {
     let id: String
     let blogId: String
     let createdAt: String
@@ -51,7 +51,7 @@ struct Media: Codable {
 }
 
 // MARK: - User
-struct User: Codable {
+struct User: Codable, Hashable {
     let id: String
     let blogId: String
     let createdAt: String

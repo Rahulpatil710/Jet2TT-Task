@@ -38,6 +38,7 @@ class BlogTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        self.contentView.autoresizingMask = .flexibleHeight
         // Initialization code
     }
 
@@ -57,8 +58,8 @@ class BlogTableViewCell: UITableViewCell {
         titleLabel.text = blog.media.first?.title ?? ""
         urlLabel.text = blog.media.first?.url ?? ""
         
-        likeLabel.text = "\(blog.likes) Likes"
-        commentLabel.text = "\(blog.comments) Comments"
+        likeLabel.text = "\(blog.likes.formatCounts()) Likes"
+        commentLabel.text = "\(blog.comments.formatCounts()) Comments"
         
         let hideMedia = blog.media.first != nil ? false : true
         mediaView.isHidden = hideMedia

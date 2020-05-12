@@ -23,10 +23,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let blogsAPI = BlogsAPI()
         let articlesViewModel = ArticlesViewModel(blogsAPI, and: pendingOperations)
         let articlesViewController = ArticlesViewController(articlesViewModel)
+        articlesViewController.view.backgroundColor = .systemBackground
         articlesViewModel.output = articlesViewController
         let navigationViewController = UINavigationController(rootViewController: articlesViewController)
         window?.rootViewController = navigationViewController
-            
+
         return true
     }
 

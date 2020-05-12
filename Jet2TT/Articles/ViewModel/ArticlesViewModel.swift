@@ -27,8 +27,9 @@ protocol ArticlesViewModelInput {
 }
 
 protocol ArticlesViewModelOutput: class {
-    func showArticles()
-    
+    func onFetchCompleted(with newBlogs: Blogs)
+    func onFetchFailed(with reason: String)
+
     func tableViewReloadItemsAt(_ indexPaths: [IndexPath])
 }
 
@@ -37,10 +38,17 @@ class ArticlesViewModel: ArticlesViewModelInput {
     private var pendingOperations: PendingOperationsProtocol!
 
     weak var output:ArticlesViewModelOutput?
+    
     fileprivate var blogs = Blogs()
     fileprivate var blogImages = [BlogImage]()
-    fileprivate var page: Int = 1
+    
+    private var currentPage = 1
     fileprivate var reachedMaxLimit: Bool = false
+    private var isFetchInProgress = false
+
+    var currentCount: Int {
+      return blogs.count
+    }
 
     init(_ blogsAPI: BlogsNetworkProtocol, and pendingOperations: PendingOperationsProtocol ) {
         self.blogsAPI = blogsAPI
@@ -51,28 +59,34 @@ class ArticlesViewModel: ArticlesViewModelInput {
         if reachedMaxLimit {
             return
         }
-        blogsAPI.fetchBlogs(page) { (blogs, responseType, message) in
-            if responseType == .success {
-                if let newBlogs = blogs {
-                    self.updateBlogs(newBlogs)
-                    self.page += 1
-                    self.output?.showArticles()
-                } else {
-                    self.reachedMaxLimit = true
+        guard !isFetchInProgress else {
+            return
+        }
+        isFetchInProgress = true
+        
+        blogsAPI.fetchBlogs(currentPage) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self.isFetchInProgress = false
+                    self.output?.onFetchFailed(with: error.reason)
+                }
+                
+            case .success(let newBlogs):
+                DispatchQueue.main.async {
+                    self.currentPage += 1
+                    self.isFetchInProgress = false
+                    self.reachedMaxLimit = newBlogs.count == 0 ? true : false
+                    self.blogs.append(contentsOf: newBlogs)
+                    self.updateBlogImages(newBlogs)
+                    self.output?.onFetchCompleted(with: self.blogs)
                 }
             }
         }
     }
-    
-    private func updateBlogs(_ newBlogs: Blogs) {
-        updateBlogImages(newBlogs)
-        if blogs.count > 0 {
-            blogs += newBlogs
-        } else {
-            blogs = newBlogs
-        }
-    }
-    
+        
     private func updateBlogImages(_ newBlogs: Blogs) {
         var newBlogImages = [BlogImage]()
         for newBlog in newBlogs {
@@ -86,11 +100,7 @@ class ArticlesViewModel: ArticlesViewModelInput {
                 }
             }
         }
-        if blogImages.count > 0 {
-            blogImages += newBlogImages
-        } else {
-            blogImages = newBlogImages
-        }
+        self.blogImages.append(contentsOf: newBlogImages)
     }
     
     func onViewDidLoad() {
@@ -176,7 +186,6 @@ class ArticlesViewModel: ArticlesViewModelInput {
             }
         }
     }
-
 }
 
 extension ArticlesViewModel {
