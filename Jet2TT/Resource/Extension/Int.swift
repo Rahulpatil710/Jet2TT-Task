@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension Int {
+extension Int64 {
     
     func formatCounts() -> String {
         let number = Double(self)

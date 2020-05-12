@@ -9,15 +9,15 @@
 import Foundation
 
 protocol ArticlesViewModelInput {
-    func onViewDidLoad()
+    func onViewWillAppear()
     
     func numberOfRows() -> Int
-    func presentableBlog(at index: Int) -> Blog?
+    func presentableBlog(at index: Int) -> BlogItem?
     func presentableBlogImage(at index: Int) -> BlogImage?
     
     func tableViewCellForProfileImage(at indexPath: IndexPath)
     func tableViewCellForMediaImage(at indexPath: IndexPath)
-
+    
     func tableViewWillBeginDragging()
     func tableViewDidEndDragging()
     
@@ -27,29 +27,26 @@ protocol ArticlesViewModelInput {
 }
 
 protocol ArticlesViewModelOutput: class {
-    func onFetchCompleted(with newBlogs: Blogs)
+    func onFetchCompleted(with blogItems: [BlogItem])
     func onFetchFailed(with reason: String)
-
+    
     func tableViewReloadItemsAt(_ indexPaths: [IndexPath])
 }
 
 class ArticlesViewModel: ArticlesViewModelInput {
+    
     private let blogsAPI: BlogsNetworkProtocol!
     private var pendingOperations: PendingOperationsProtocol!
-
+    
     weak var output:ArticlesViewModelOutput?
     
-    fileprivate var blogs = Blogs()
+    fileprivate var blogItems = [BlogItem]()
     fileprivate var blogImages = [BlogImage]()
     
     private var currentPage = 1
     fileprivate var reachedMaxLimit: Bool = false
     private var isFetchInProgress = false
-
-    var currentCount: Int {
-      return blogs.count
-    }
-
+    
     init(_ blogsAPI: BlogsNetworkProtocol, and pendingOperations: PendingOperationsProtocol ) {
         self.blogsAPI = blogsAPI
         self.pendingOperations = pendingOperations
@@ -64,6 +61,16 @@ class ArticlesViewModel: ArticlesViewModelInput {
         }
         isFetchInProgress = true
         
+        let coreDataManager = CoreDataManager.shared()
+        let blogItems = coreDataManager.fetchBlogItems()
+        if blogItems.count > 0, self.currentPage < blogItems.count/10 + 1 {
+            self.currentPage = blogItems.count/10 + 1
+            self.updateBlogImages(blogItems)
+            self.blogItems  = blogItems
+            self.isFetchInProgress = false
+            self.output?.onFetchCompleted(with: blogItems)
+            return
+        }
         blogsAPI.fetchBlogs(currentPage) { [weak self] result in
             guard let self = self else { return }
             
@@ -79,41 +86,65 @@ class ArticlesViewModel: ArticlesViewModelInput {
                     self.currentPage += 1
                     self.isFetchInProgress = false
                     self.reachedMaxLimit = newBlogs.count == 0 ? true : false
-                    self.blogs.append(contentsOf: newBlogs)
-                    self.updateBlogImages(newBlogs)
-                    self.output?.onFetchCompleted(with: self.blogs)
+                                    
+                    let coreDataManager = CoreDataManager.shared()
+                    coreDataManager.prepare(newBlogs)
+                    
+                    let blogItems = coreDataManager.fetchBlogItems()
+                    
+                    self.updateBlogImages(blogItems)
+                    self.blogItems = blogItems
+                        
+                    self.output?.onFetchCompleted(with: blogItems)
                 }
             }
         }
-    }
-        
-    private func updateBlogImages(_ newBlogs: Blogs) {
-        var newBlogImages = [BlogImage]()
-        for newBlog in newBlogs {
-            if let profile = newBlog.user.first?.avatar {
-                let profileImage = RPImage(profile)
-                if let media = newBlog.media.first?.image {
-                    let mediaImage = RPImage(media)
-                    newBlogImages.append(BlogImage(profileImage, and: mediaImage))
-                } else {
-                    newBlogImages.append(BlogImage(profileImage))
-                }
-            }
-        }
-        self.blogImages.append(contentsOf: newBlogImages)
     }
     
-    func onViewDidLoad() {
+    private func updateBlogImages(_ newBlogs: [BlogItem]) {
+        blogImages = [BlogImage]()
+        for newBlog in newBlogs {
+            let profileImage = getImage(from: newBlog, for: .profile)
+            let mediaImage = getImage(from: newBlog, for: .media)
+            blogImages.append(BlogImage(profileImage, and: mediaImage))
+        }
+    }
+    
+    private func getImage(from blogItem: BlogItem, for type: ImageType) -> RPImage? {
+        var url: URL?
+        var imageData: Data?
+        switch type {
+        case .profile:
+            url = blogItem.profileUrl
+            imageData = blogItem.profileImage
+            
+        case .media:
+            url = blogItem.mediaUrl
+            imageData = blogItem.mediaImage
+        }
+        
+        if let id = blogItem.id, let url = url {
+            let image = RPImage(id, imageUrl: url)
+            if let imageData = imageData {
+                image.state = .downloaded
+                image.imageData = imageData
+            }
+            return image
+        }
+        return nil
+    }
+    
+    func onViewWillAppear() {
         fetchBlogs()
     }
     
     func numberOfRows() -> Int {
-        return blogs.count
+        return blogItems.count
     }
     
-    func presentableBlog(at index: Int) -> Blog? {
-        guard index < blogs.count else { return nil }
-        return blogs[index]
+    func presentableBlog(at index: Int) -> BlogItem? {
+        guard index < blogItems.count else { return nil }
+        return blogItems[index]
     }
     
     func presentableBlogImage(at index: Int) -> BlogImage? {
@@ -122,8 +153,9 @@ class ArticlesViewModel: ArticlesViewModelInput {
     }
     
     func tableViewCellForProfileImage(at indexPath: IndexPath) {
-        if let image = presentableBlogImage(at: indexPath.row) {
-            startDownload(profile: image.profileImage, at: indexPath)
+        if let image = presentableBlogImage(at: indexPath.row),
+            let profileImage = image.profileImage {
+            startDownload(profile: profileImage, at: indexPath)
         }
     }
     
@@ -153,7 +185,7 @@ class ArticlesViewModel: ArticlesViewModelInput {
         if indexPaths.count > 0 {
             var allPendingOperations = Set(pendingOperations.profileDownloadInProgress.keys)
             allPendingOperations.formUnion(pendingOperations.mediaDownloadInProgress.keys)
-
+            
             let visibleIndexPath = Set(indexPaths)
             
             var toBecancelled = allPendingOperations
@@ -175,8 +207,9 @@ class ArticlesViewModel: ArticlesViewModelInput {
             }
             for indexPath in toBeStarted {
                 if let recordToProcess = presentableBlogImage(at: indexPath.item) {
-                    if recordToProcess.profileImage.state == .new {
-                        startDownload(profile: recordToProcess.profileImage, at: indexPath)
+                    if let profileImage = recordToProcess.profileImage,
+                        profileImage.state == .new {
+                        startDownload(profile: profileImage, at: indexPath)
                     }
                     if let mediaImage = recordToProcess.mediaImage,
                         mediaImage.state == .new {
@@ -224,7 +257,6 @@ extension ArticlesViewModel {
     private func suspendAllOpertions() {
         pendingOperations.profileDownloadQueue.isSuspended = true
         pendingOperations.mediaDownloadQueue.isSuspended = true
-
     }
     
     // Whiwhen scrolling stops or ViewWillAppear called all supspended operations make it resume and then can start download images

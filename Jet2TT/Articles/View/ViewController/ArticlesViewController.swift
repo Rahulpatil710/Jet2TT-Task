@@ -8,15 +8,15 @@
 
 import UIKit
 
+enum ImageType {
+    case profile
+    case media
+}
+
 class ArticlesViewController: UIViewController {
     
-    enum ImageType {
-        case profile
-        case media
-    }
-    
     private let viewModel:ArticlesViewModelInput!
-    private var dataSource: UITableViewDiffableDataSource<Section, Blog>!
+    private var dataSource: UITableViewDiffableDataSource<Section, BlogItem>!
     
     init(_ viewModel: ArticlesViewModelInput) {
         self.viewModel = viewModel
@@ -68,10 +68,15 @@ class ArticlesViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
         setUpNavigationTitle()
         setUpTableView()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.onViewWillAppear()
         configureDateSource()
-        viewModel.onViewDidLoad()
     }
     
     private func setUpNavigationTitle() {
@@ -93,22 +98,25 @@ class ArticlesViewController: UIViewController {
     }
     
     private func configureDateSource() {
-        dataSource = UITableViewDiffableDataSource<Section, Blog>(tableView: tableView, cellProvider: { (tableView, indexPath, blog) -> UITableViewCell? in
+        dataSource = UITableViewDiffableDataSource<Section, BlogItem>(tableView: tableView, cellProvider: { (tableView, indexPath, blog) -> UITableViewCell? in
             guard let blog = self.viewModel.presentableBlog(at: indexPath.row),
                 let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: BlogTableViewCell.self), for: indexPath) as? BlogTableViewCell else { return UITableViewCell() }
             cell.layoutIfNeeded()
             cell.updateCell(blog)
+           
             if let blogImage = self.viewModel.presentableBlogImage(at: indexPath.row) {
                 self.addImage(to: cell.profileImageView,
                               with: cell.profileActivityIndicator,
                               and: blogImage.profileImage,
                               at: indexPath,
-                              of: .profile)
+                              of: .profile,
+                              update: &blog.profileImage)
                 self.addImage(to: cell.mediaImageView,
                               with: cell.mediaActivityIndicator,
                               and: blogImage.mediaImage,
                               at: indexPath,
-                              of: .media)
+                              of: .media,
+                              update: &blog.mediaImage)
                 self.profileImageSize = cell.profileImageView.bounds.size
                 self.mediaImageSize = cell.mediaImageView.bounds.size
             }
@@ -117,20 +125,21 @@ class ArticlesViewController: UIViewController {
         })
     }
     
-    private func createSnapShot(from newBlogs: Blogs) {
+    private func createSnapShot(from blogIems: [BlogItem]) {
         DispatchQueue.main.async {
-            var snapshot = NSDiffableDataSourceSnapshot<Section, Blog>()
+            var snapshot = NSDiffableDataSourceSnapshot<Section, BlogItem>()
             snapshot.appendSections([.main])
-            snapshot.appendItems(newBlogs)
+            snapshot.appendItems(blogIems)
             self.dataSource.apply(snapshot, animatingDifferences: true, completion: nil)
         }
     }
-    
+        
     private func addImage(to imageView: UIImageView,
                           with activityIndicator: UIActivityIndicatorView,
                           and blogImage: RPImage?,
                           at indexPath: IndexPath,
-                          of type: ImageType) {
+                          of type: ImageType,
+                          update imageData: inout Data?) {
         if let image = blogImage {
             switch image.state {
             case .new:
@@ -149,6 +158,12 @@ class ArticlesViewController: UIViewController {
                 if let cachedImage = self.cache.image(for: image.url) {
                     imageView.image = cachedImage
                 } else if let data = image.imageData {
+                    if imageData == nil {
+                        imageData = data
+                        let coreDataManager = CoreDataManager.shared()
+                        coreDataManager.updateBlogItem(for: image.id, as: data, of: type)
+                    }
+                    
                     let imageSize = imageView.bounds.size
                     let scale = tableView.traitCollection.displayScale
                     
@@ -165,11 +180,11 @@ class ArticlesViewController: UIViewController {
             }
         }
     }
-
+    
     private func prefetchImage(to blogImage: RPImage?,
                                with imageSize: CGSize?,
-                          at indexPath: IndexPath,
-                          of type: ImageType) {
+                               at indexPath: IndexPath,
+                               of type: ImageType) {
         if let image = blogImage {
             switch image.state {
             case .new:
@@ -214,14 +229,15 @@ extension ArticlesViewController {
 }
 
 extension ArticlesViewController: ArticlesViewModelOutput, AlertDisplayer {
-    func onFetchCompleted(with newBlogs: Blogs) {
+    
+    func onFetchCompleted(with blogItems: [BlogItem]) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             if self.tableView.isHidden {
                 self.indicatorView.stopAnimating()
                 self.tableView.isHidden = false
             }
-            self.createSnapShot(from: newBlogs)
+            self.createSnapShot(from: blogItems)
         }
     }
     
@@ -237,9 +253,9 @@ extension ArticlesViewController: ArticlesViewModelOutput, AlertDisplayer {
         DispatchQueue.main.async {
             let indexPathToReload = self.visibleIndexPathsToReload(intersecting: indexPaths)
             for indexPath in indexPathToReload {
-                if let blog = self.viewModel.presentableBlog(at: indexPath.row) {
+                if let blogItem = self.viewModel.presentableBlog(at: indexPath.row) {
                     var currentSnapshot = self.dataSource.snapshot()
-                    currentSnapshot.reloadItems([blog])
+                    currentSnapshot.reloadItems([blogItem])
                     self.dataSource.apply(currentSnapshot, animatingDifferences: true)
                 }
             }

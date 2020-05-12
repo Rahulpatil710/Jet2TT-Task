@@ -48,23 +48,22 @@ class BlogTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    func updateCell(_ blog: Blog) {
-        nameLabel.text = blog.user.first?.name ?? ""
-        designationLabel.text = blog.user.first?.designation ?? ""
+    func updateCell(_ blog: BlogItem) {
+        nameLabel.text = blog.userName ?? ""
+        designationLabel.text = blog.designation ?? ""
         
-        timeLabel.text = blog.createdAt.getDate()?.timeAgoDisplay()
+        timeLabel.text = (blog.time ?? "").getDate()?.timeAgoDisplay() ?? ""
         
-        contentLabel.text = blog.content
-        titleLabel.text = blog.media.first?.title ?? ""
-        urlLabel.text = blog.media.first?.url ?? ""
+        contentLabel.text = blog.content ?? ""
+        titleLabel.text = blog.title ?? ""
+        urlLabel.text = blog.url ?? ""
         
         likeLabel.text = "\(blog.likes.formatCounts()) Likes"
         commentLabel.text = "\(blog.comments.formatCounts()) Comments"
         
-        let hideMedia = blog.media.first != nil ? false : true
-        mediaView.isHidden = hideMedia
-        mediaImageView.isHidden = hideMedia
-        titleLabel.isHidden = hideMedia
-        urlLabel.isHidden = hideMedia
+        mediaView.isHidden = !blog.isMediaPresent
+        mediaImageView.isHidden = !blog.isMediaPresent
+        titleLabel.isHidden = !blog.isMediaPresent
+        urlLabel.isHidden = !blog.isMediaPresent
     }
 }

@@ -13,14 +13,14 @@ extension Date {
     func timeAgoDisplay() -> String {
         let secondsAgo = Int(Date().timeIntervalSince(self))
         if secondsAgo < 60 {
-            return "\(secondsAgo) seconds ago"
+            return "\(secondsAgo) seconds"
         } else if secondsAgo < 60 * 60 {
-            return "\(secondsAgo / 60) minutes ago"
+            return "\(secondsAgo / 60) minutes"
         } else if secondsAgo < 60 * 60 * 24 {
-            return "\(secondsAgo / 60 / 60) hours ago"
+            return "\(secondsAgo / 60 / 60) hours"
         } else if secondsAgo < 60 * 60 * 24 * 7{
-            return "\(secondsAgo / 60 / 60 / 24 ) days ago"
+            return "\(secondsAgo / 60 / 60 / 24 ) days"
         }
-        return "\(secondsAgo / 60 / 60 / 24 / 7) weeks ago"
+        return "\(secondsAgo / 60 / 60 / 24 / 7) weeks"
     }
 }
