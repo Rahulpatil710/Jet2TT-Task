@@ -14,18 +14,21 @@ enum ImageState {
 }
 
 protocol RPImageProtocol {
+    var id: String { get }
     var url: URL { get }
     var state: ImageState { get set }
     var imageData: Data? { get set }
-    init(_ imageUrl: URL, imageState: ImageState, data: Data?)
+    init(_ blogId: String, imageUrl: URL, imageState: ImageState, data: Data?)
 }
 
 class RPImage: RPImageProtocol {
+    let id: String
     let url: URL
     var state: ImageState
     var imageData: Data?
     
-    required init(_ imageUrl: URL, imageState: ImageState = .new, data: Data? = nil) {
+    required init(_ blogId: String, imageUrl: URL, imageState: ImageState = .new, data: Data? = nil) {
+        id = blogId
         url = imageUrl
         state = imageState
         imageData = data
@@ -33,16 +36,16 @@ class RPImage: RPImageProtocol {
 }
 
 protocol BlogImageProtocol {
-    var profileImage: RPImage { get set }
+    var profileImage: RPImage? { get set }
     var mediaImage: RPImage? { get set }
-    init(_ profile: RPImage, and media: RPImage?)
+    init(_ profile: RPImage?, and media: RPImage?)
 }
 
 class BlogImage: BlogImageProtocol {
-    var profileImage: RPImage
+    var profileImage: RPImage?
     var mediaImage: RPImage?
     
-    required init(_ profile: RPImage, and media: RPImage? = nil) {
+    required init(_ profile: RPImage? = nil, and media: RPImage? = nil) {
         profileImage = profile
         mediaImage = media
     }

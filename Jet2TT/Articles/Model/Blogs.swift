@@ -29,6 +29,16 @@ struct Blog: Codable, Hashable {
         case media
         case user
     }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(createdAt)
+        hasher.combine(user)
+        hasher.combine(content)
+        hasher.combine(media)
+        hasher.combine(likes)
+        hasher.combine(comments)
+    }
 }
 
 // MARK: - Media
@@ -47,6 +57,15 @@ struct Media: Codable, Hashable {
         case image
         case title
         case url
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(blogId)
+        hasher.combine(createdAt)
+        hasher.combine(image)
+        hasher.combine(title)
+        hasher.combine(url)
     }
 }
 
@@ -72,5 +91,17 @@ struct User: Codable, Hashable {
         case city
         case designation
         case about
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(blogId)
+        hasher.combine(createdAt)
+        hasher.combine(name)
+        hasher.combine(lastname)
+        hasher.combine(avatar)
+        hasher.combine(designation)
+        hasher.combine(city)
+        hasher.combine(about)
     }
 }
