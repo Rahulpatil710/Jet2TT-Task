@@ -9,8 +9,14 @@
 import UIKit
 
 class ArticlesViewController: UIViewController {
-
+    
+    enum ImageType {
+        case profile
+        case media
+    }
+    
     private let viewModel:ArticlesViewModelInput!
+    private var dataSource: UITableViewDiffableDataSource<Section, Blog>!
     
     init(_ viewModel: ArticlesViewModelInput) {
         self.viewModel = viewModel
@@ -24,6 +30,9 @@ class ArticlesViewController: UIViewController {
     private lazy var tableView: UITableView! = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.backgroundColor = .systemBackground
+        tableView.estimatedRowHeight = 400
+        tableView.rowHeight = UITableView.automaticDimension
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
@@ -32,141 +41,234 @@ class ArticlesViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
         ])
-       return tableView
+        return tableView
     }()
     
-    var imageSize: CGSize?
-    var scale: CGFloat?
+    private lazy var indicatorView: UIActivityIndicatorView! = {
+        let indicatorView = UIActivityIndicatorView()
+        indicatorView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(indicatorView)
+        
+        NSLayoutConstraint.activate([
+            indicatorView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            tableView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+        ])
+        return indicatorView
+    }()
+    
+    
+    var profileImageSize: CGSize?
+    var mediaImageSize: CGSize?
+    
     var tableViewScrolling = false
+    
     private let cache = ImageCache.shared
-
+    private let serialQueue = DispatchQueue(label: "Decode Queue")
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpNavigationTitle()
         setUpTableView()
+        configureDateSource()
+        viewModel.onViewDidLoad()
     }
     
     private func setUpNavigationTitle() {
         navigationItem.title = "Articles"
     }
     
-    private func setUpTableView() {
-        registerCell()
-        tableView.tableFooterView = UIView()
-        tableView.dataSource = self
-        tableView.delegate = self
-        viewModel.onViewDidLoad()
-    }
-    
-    private func registerCell() {
-        let cellName = String(describing: BlogTableViewCell.self)
+    private func registerCell(_ cellName: String) {
         let nibName = UINib(nibName: cellName, bundle: nil)
         tableView.register(nibName, forCellReuseIdentifier: cellName)
     }
-}
-
-extension ArticlesViewController: ArticlesViewModelOutput {
-    func showArticles() {
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-        }
-    }
+    
+    private func setUpTableView() {
+        registerCell(String(describing: BlogTableViewCell.self))
+        tableView.isHidden = true
         
-    func tableViewReloadItemsAt(_ indexPaths: [IndexPath]) {
-        DispatchQueue.main.async {
-            self.tableView.beginUpdates()
-            self.tableView.reloadRows(at: indexPaths, with: .automatic)
-            self.tableView.endUpdates()
-        }
-    }
-}
-
-extension ArticlesViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.numberOfRows()
+        tableView.tableFooterView = UIView()
+        tableView.delegate = self
+        indicatorView.startAnimating()
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let blog = viewModel.presentableBlog(at: indexPath.row),
-            let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: BlogTableViewCell.self), for: indexPath) as? BlogTableViewCell else { return UITableViewCell() }
-        cell.layoutIfNeeded()
-        cell.updateCell(blog)
-        if let blogImage = viewModel.presentableBlogImage(at: indexPath.row) {
-            let profileImage = blogImage.profileImage
-            switch profileImage.state {
+    private func configureDateSource() {
+        dataSource = UITableViewDiffableDataSource<Section, Blog>(tableView: tableView, cellProvider: { (tableView, indexPath, blog) -> UITableViewCell? in
+            guard let blog = self.viewModel.presentableBlog(at: indexPath.row),
+                let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: BlogTableViewCell.self), for: indexPath) as? BlogTableViewCell else { return UITableViewCell() }
+            cell.layoutIfNeeded()
+            cell.updateCell(blog)
+            if let blogImage = self.viewModel.presentableBlogImage(at: indexPath.row) {
+                self.addImage(to: cell.profileImageView,
+                              with: cell.profileActivityIndicator,
+                              and: blogImage.profileImage,
+                              at: indexPath,
+                              of: .profile)
+                self.addImage(to: cell.mediaImageView,
+                              with: cell.mediaActivityIndicator,
+                              and: blogImage.mediaImage,
+                              at: indexPath,
+                              of: .media)
+                self.profileImageSize = cell.profileImageView.bounds.size
+                self.mediaImageSize = cell.mediaImageView.bounds.size
+            }
+            cell.layoutIfNeeded()
+            return cell
+        })
+    }
+    
+    private func createSnapShot(from newBlogs: Blogs) {
+        DispatchQueue.main.async {
+            var snapshot = NSDiffableDataSourceSnapshot<Section, Blog>()
+            snapshot.appendSections([.main])
+            snapshot.appendItems(newBlogs)
+            self.dataSource.apply(snapshot, animatingDifferences: true, completion: nil)
+        }
+    }
+    
+    private func addImage(to imageView: UIImageView,
+                          with activityIndicator: UIActivityIndicatorView,
+                          and blogImage: RPImage?,
+                          at indexPath: IndexPath,
+                          of type: ImageType) {
+        if let image = blogImage {
+            switch image.state {
             case .new:
-                cell.profileActivityIndicator.startAnimating()
-                cell.profileImageView.image = nil
+                activityIndicator.startAnimating()
+                imageView.image = nil
                 // If collectionView is not scrolling then start download image
                 if !tableView.isDragging && !tableView.isDecelerating {
-                    viewModel.tableViewCellForProfileImage(at: indexPath)
+                    switch type {
+                    case .profile: self.viewModel.tableViewCellForProfileImage(at: indexPath)
+                    case .media: self.viewModel.tableViewCellForMediaImage(at: indexPath)
+                    }
                 }
             case .downloaded:
-                cell.profileActivityIndicator.stopAnimating()
+                activityIndicator.stopAnimating()
                 // Checking for cached image
-                if let cachedImage = cache.image(for: profileImage.url) {
-                    cell.profileImageView.image = cachedImage
-                } else if let data = profileImage.imageData {
-                    imageSize = cell.profileImageView.bounds.size
-                    scale = tableView.traitCollection.displayScale
+                if let cachedImage = self.cache.image(for: image.url) {
+                    imageView.image = cachedImage
+                } else if let data = image.imageData {
+                    let imageSize = imageView.bounds.size
+                    let scale = tableView.traitCollection.displayScale
                     
                     // Creating downsample image for reducing memory
                     // This reduced image size near by 50%
-                    let downsampledImage = UIImage.downsample(imageAt: data, to: imageSize!, scale: scale!)
-                    cell.profileImageView.image = downsampledImage
+                    let downsampledImage = UIImage.downsample(imageAt: data, to: imageSize, scale: scale)
+                    imageView.image = downsampledImage
                     
                     // Storing downsampled image in cache with respect to url
-                    cache.insertImage(downsampledImage, for: profileImage.url)
+                    self.cache.insertImage(downsampledImage, for: image.url)
                 }
                 
-            case .failed:  cell.profileActivityIndicator.stopAnimating()
+            case .failed:  activityIndicator.stopAnimating()
             }
-            
-            if let mediaImage = blogImage.mediaImage {
-                switch mediaImage.state {
-                case .new:
-                    cell.mediaActivityIndicator.startAnimating()
-                    cell.mediaImageView.image = nil
-                    // If collectionView is not scrolling then start download image
-                    if !tableView.isDragging && !tableView.isDecelerating {
-                        viewModel.tableViewCellForMediaImage(at: indexPath)
+        }
+    }
+
+    private func prefetchImage(to blogImage: RPImage?,
+                               with imageSize: CGSize?,
+                          at indexPath: IndexPath,
+                          of type: ImageType) {
+        if let image = blogImage {
+            switch image.state {
+            case .new:
+                serialQueue.async {
+                    switch type {
+                    case .profile: self.viewModel.tableViewCellForProfileImage(at: indexPath)
+                    case .media: self.viewModel.tableViewCellForMediaImage(at: indexPath)
                     }
-                case .downloaded:
-                    cell.profileActivityIndicator.stopAnimating()
-                    // Checking for cached image
-                    if let cachedImage = cache.image(for: mediaImage.url) {
-                        cell.mediaImageView.image = cachedImage
-                    } else if let data = mediaImage.imageData {
-                        imageSize = cell.profileImageView.bounds.size
-                        scale = tableView.traitCollection.displayScale
-                        
+                }
+                
+            case .downloaded:
+                if let _ = cache.image(for: image.url) {
+                    break
+                } else if let data = image.imageData {
+                    serialQueue.async {
                         // Creating downsample image for reducing memory
-                        // This reduced image size near by 50%
-                        let downsampledImage = UIImage.downsample(imageAt: data, to: imageSize!, scale: scale!)
-                        cell.mediaImageView.image = downsampledImage
+                        guard let imageSize = imageSize else { return }
+                        let scale = self.tableView.traitCollection.displayScale
+                        let downsampledImage = UIImage.downsample(imageAt: data, to: imageSize, scale: scale)
                         
                         // Storing downsampled image in cache with respect to url
-                        cache.insertImage(downsampledImage, for: mediaImage.url)
+                        self.cache.insertImage(downsampledImage, for: image.url)
                     }
-                    
-                case .failed:  cell.mediaActivityIndicator.stopAnimating()
+                }
+                
+            case .failed: break
+            }
+        }
+    }
+    
+    private func visibleIndexPathsToReload(intersecting indexPaths: [IndexPath]) -> [IndexPath] {
+        let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows ?? []
+        let indexPathsIntersection = Set(indexPathsForVisibleRows).intersection(indexPaths)
+        return Array(indexPathsIntersection)
+    }
+}
+
+extension ArticlesViewController {
+    fileprivate enum Section {
+        case main
+    }
+}
+
+extension ArticlesViewController: ArticlesViewModelOutput, AlertDisplayer {
+    func onFetchCompleted(with newBlogs: Blogs) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if self.tableView.isHidden {
+                self.indicatorView.stopAnimating()
+                self.tableView.isHidden = false
+            }
+            self.createSnapShot(from: newBlogs)
+        }
+    }
+    
+    func onFetchFailed(with reason: String) {
+        indicatorView.stopAnimating()
+        
+        let title = "Warning"
+        let action = UIAlertAction(title: "Ok", style: .default)
+        displayAlert(with: title , message: reason, actions: [action])
+    }
+    
+    func tableViewReloadItemsAt(_ indexPaths: [IndexPath]) {
+        DispatchQueue.main.async {
+            let indexPathToReload = self.visibleIndexPathsToReload(intersecting: indexPaths)
+            for indexPath in indexPathToReload {
+                if let blog = self.viewModel.presentableBlog(at: indexPath.row) {
+                    var currentSnapshot = self.dataSource.snapshot()
+                    currentSnapshot.reloadItems([blog])
+                    self.dataSource.apply(currentSnapshot, animatingDifferences: true)
                 }
             }
         }
-        cell.layoutIfNeeded()
-        return cell
     }
 }
 
-extension ArticlesViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if viewModel.numberOfRows() - 1 == indexPath.row {
-            viewModel.onWillDisplayAtLastCell()
+extension ArticlesViewController: UITableViewDataSourcePrefetching {
+    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        if !self.tableViewScrolling {
+            for indexPath in indexPaths {
+                if indexPath.row == viewModel.numberOfRows() - 1 {
+                    return
+                }
+                guard let blogImage = self.viewModel.presentableBlogImage(at: indexPath.row) else { return }
+                self.prefetchImage(to: blogImage.profileImage,
+                                   with: self.profileImageSize,
+                                   at: indexPath,
+                                   of: .profile)
+                self.prefetchImage(to: blogImage.mediaImage,
+                                   with: self.mediaImageSize,
+                                   at: indexPath,
+                                   of: .media)
+            }
         }
     }
 }
 
-extension ArticlesViewController: UIScrollViewDelegate {
+extension ArticlesViewController:UITableViewDelegate, UIScrollViewDelegate {
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         tableViewScrolling = true
@@ -188,6 +290,12 @@ extension ArticlesViewController: UIScrollViewDelegate {
         viewModel.tableViewDidEndDragging()
         if let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows {
             viewModel.loadImagesOnScreenVisibleCells(indexPathsForVisibleRows)
+        }
+        let currentOffset: CGFloat = scrollView.contentOffset.y
+        let contentHeight: CGFloat = scrollView.contentSize.height
+        let scrollHeight: CGFloat = scrollView.frame.size.height
+        if currentOffset + (3/2*scrollHeight)  >= contentHeight {
+            viewModel.onWillDisplayAtLastCell()
         }
     }
 }
