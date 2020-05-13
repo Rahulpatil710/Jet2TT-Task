@@ -327,7 +327,7 @@ extension ArticlesViewController:UITableViewDelegate, UIScrollViewDelegate {
         let contentHeight: CGFloat = scrollView.contentSize.height
         let scrollHeight: CGFloat = scrollView.frame.size.height
         if currentOffset + (3/2*scrollHeight)  >= contentHeight {
-            viewModel.onWillDisplayAtLastCell()
+            viewModel.scrollViewReachedAtMax()
         }
     }
 }

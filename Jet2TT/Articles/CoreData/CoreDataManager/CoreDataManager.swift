@@ -9,16 +9,27 @@
 import Foundation
 import CoreData
 
-class CoreDataManager: NSObject {
+protocol CoreDataManagerProtocol {
+    static func shared() -> CoreDataManagerProtocol
+    func saveContext ()
+    func saveDataInBackground()
+    func prepare(_ blogs: [Blog])
+    func createEntity(from blog: Blog) -> BlogItem?
+    func fetchBlogItems() -> [BlogItem]
+    func updateBlogItem(for id: String, as imageData: Data, of type: ImageType)
+}
+
+
+class CoreDataManager: NSObject, CoreDataManagerProtocol {
 
     private override init() {
         super.init()
     }
     // Create a shared Instance
-    static let instance = CoreDataManager()
+    static private let instance = CoreDataManager()
     
     // Shared Function
-    class func shared() -> CoreDataManager{
+    static func shared() -> CoreDataManagerProtocol {
         return instance
     }
     
@@ -40,11 +51,11 @@ class CoreDataManager: NSObject {
     // MARK: - Core Data stack
     
     // Get the managed Object Context
-    lazy var managedObjectContext = {
+    lazy private var managedObjectContext = {
         return persistentContainer.viewContext
     }()
     
-    lazy var persistentContainer: NSPersistentContainer = {
+    lazy private var persistentContainer: NSPersistentContainer = {
         /*
          The persistent container for the application. This implementation
          creates and returns a container, having loaded the store for the
@@ -73,7 +84,7 @@ class CoreDataManager: NSObject {
 
     // MARK: - Core Data Saving support
 
-    func saveContext () {
+    func saveContext() {
         if managedObjectContext.hasChanges {
             do {
                 try managedObjectContext.save()

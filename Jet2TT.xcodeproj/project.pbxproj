@@ -27,8 +27,18 @@
 		C274489F2469F3AB00DC57B6 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C274489D2469F3AB00DC57B6 /* ImageCache.swift */; };
 		C27448A12469FAC900DC57B6 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27448A02469FAC900DC57B6 /* Date.swift */; };
 		C27448A32469FBD500DC57B6 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27448A22469FBD500DC57B6 /* String.swift */; };
+		C287C07E246C10780051653A /* CoreDataManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C287C07D246C10780051653A /* CoreDataManagerMock.swift */; };
+		C287C080246C31DE0051653A /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = C287C07F246C31DE0051653A /* File.swift */; };
+		C287C082246C36470051653A /* ArticlesViewControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C287C081246C36470051653A /* ArticlesViewControllerTest.swift */; };
+		C287C084246C40760051653A /* RPImageTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C287C083246C40760051653A /* RPImageTest.swift */; };
+		C287C088246C44BE0051653A /* ArticlesViewControllerUITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C287C087246C44BE0051653A /* ArticlesViewControllerUITest.swift */; };
 		C29D1E82246B2C9C00689E47 /* BlogItem+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29D1E80246B2C9C00689E47 /* BlogItem+CoreDataClass.swift */; };
 		C29D1E83246B2C9C00689E47 /* BlogItem+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29D1E81246B2C9C00689E47 /* BlogItem+CoreDataProperties.swift */; };
+		C2A7019E246BFC3E00144576 /* ArticlesViewModelMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A7019D246BFC3E00144576 /* ArticlesViewModelMock.swift */; };
+		C2A701A0246BFC4A00144576 /* ArticlesViewModelOutputMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A7019F246BFC4A00144576 /* ArticlesViewModelOutputMock.swift */; };
+		C2A701A2246BFEE500144576 /* ArticlesViewModelTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A701A1246BFEE500144576 /* ArticlesViewModelTest.swift */; };
+		C2A701A4246C01E700144576 /* PendingOperationsMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A701A3246C01E700144576 /* PendingOperationsMock.swift */; };
+		C2A701A7246C02F600144576 /* BlogsAPIMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A701A6246C02F600144576 /* BlogsAPIMock.swift */; };
 		C2D0D4DE246A7E540063F26A /* DataResponseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D0D4DD246A7E540063F26A /* DataResponseError.swift */; };
 		C2D0D4E0246A84DF0063F26A /* AlertDisplayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D0D4DF246A84DF0063F26A /* AlertDisplayer.swift */; };
 		C2D0D4E6246ADB970063F26A /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D0D4E5246ADB970063F26A /* Int.swift */; };
@@ -79,8 +89,18 @@
 		C274489D2469F3AB00DC57B6 /* ImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		C27448A02469FAC900DC57B6 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 		C27448A22469FBD500DC57B6 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		C287C07D246C10780051653A /* CoreDataManagerMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManagerMock.swift; sourceTree = "<group>"; };
+		C287C07F246C31DE0051653A /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
+		C287C081246C36470051653A /* ArticlesViewControllerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticlesViewControllerTest.swift; sourceTree = "<group>"; };
+		C287C083246C40760051653A /* RPImageTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RPImageTest.swift; sourceTree = "<group>"; };
+		C287C087246C44BE0051653A /* ArticlesViewControllerUITest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticlesViewControllerUITest.swift; sourceTree = "<group>"; };
 		C29D1E80246B2C9C00689E47 /* BlogItem+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlogItem+CoreDataClass.swift"; sourceTree = "<group>"; };
 		C29D1E81246B2C9C00689E47 /* BlogItem+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlogItem+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C2A7019D246BFC3E00144576 /* ArticlesViewModelMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticlesViewModelMock.swift; sourceTree = "<group>"; };
+		C2A7019F246BFC4A00144576 /* ArticlesViewModelOutputMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticlesViewModelOutputMock.swift; sourceTree = "<group>"; };
+		C2A701A1246BFEE500144576 /* ArticlesViewModelTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticlesViewModelTest.swift; sourceTree = "<group>"; };
+		C2A701A3246C01E700144576 /* PendingOperationsMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingOperationsMock.swift; sourceTree = "<group>"; };
+		C2A701A6246C02F600144576 /* BlogsAPIMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlogsAPIMock.swift; sourceTree = "<group>"; };
 		C2D0D4DD246A7E540063F26A /* DataResponseError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataResponseError.swift; sourceTree = "<group>"; };
 		C2D0D4DF246A84DF0063F26A /* AlertDisplayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDisplayer.swift; sourceTree = "<group>"; };
 		C2D0D4E5246ADB970063F26A /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
@@ -150,6 +170,7 @@
 				C274485424699D1B00DC57B6 /* LaunchScreen.storyboard */,
 				C274485724699D1B00DC57B6 /* Info.plist */,
 				C274484F24699D1500DC57B6 /* Jet2TT.xcdatamodeld */,
+				C287C07F246C31DE0051653A /* File.swift */,
 			);
 			path = Jet2TT;
 			sourceTree = "<group>";
@@ -158,6 +179,8 @@
 			isa = PBXGroup;
 			children = (
 				C274486024699D1B00DC57B6 /* Jet2TTTests.swift */,
+				C2A701A5246C01F300144576 /* Test */,
+				C2A7019C246BFBFD00144576 /* Mocks */,
 				C274486224699D1B00DC57B6 /* Info.plist */,
 			);
 			path = Jet2TTTests;
@@ -167,6 +190,7 @@
 			isa = PBXGroup;
 			children = (
 				C274486B24699D1B00DC57B6 /* Jet2TTUITests.swift */,
+				C287C087246C44BE0051653A /* ArticlesViewControllerUITest.swift */,
 				C274486D24699D1B00DC57B6 /* Info.plist */,
 			);
 			path = Jet2TTUITests;
@@ -274,6 +298,28 @@
 				C274489D2469F3AB00DC57B6 /* ImageCache.swift */,
 			);
 			path = ImageCache;
+			sourceTree = "<group>";
+		};
+		C2A7019C246BFBFD00144576 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				C2A7019D246BFC3E00144576 /* ArticlesViewModelMock.swift */,
+				C2A7019F246BFC4A00144576 /* ArticlesViewModelOutputMock.swift */,
+				C2A701A3246C01E700144576 /* PendingOperationsMock.swift */,
+				C287C07D246C10780051653A /* CoreDataManagerMock.swift */,
+				C2A701A6246C02F600144576 /* BlogsAPIMock.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		C2A701A5246C01F300144576 /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				C2A701A1246BFEE500144576 /* ArticlesViewModelTest.swift */,
+				C287C081246C36470051653A /* ArticlesViewControllerTest.swift */,
+				C287C083246C40760051653A /* RPImageTest.swift */,
+			);
+			path = Test;
 			sourceTree = "<group>";
 		};
 		C2D0D4E7246B02BE0063F26A /* CoreData */ = {
@@ -442,6 +488,7 @@
 				C2D0D4E9246B02E10063F26A /* CoreDataManager.swift in Sources */,
 				C2D0D4E6246ADB970063F26A /* Int.swift in Sources */,
 				C27448932469CE9500DC57B6 /* Images.swift in Sources */,
+				C287C080246C31DE0051653A /* File.swift in Sources */,
 				C27448882469AB1000DC57B6 /* ArticlesViewController.swift in Sources */,
 				C274489F2469F3AB00DC57B6 /* ImageCache.swift in Sources */,
 				C274484724699D1500DC57B6 /* AppDelegate.swift in Sources */,
@@ -461,6 +508,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2A701A7246C02F600144576 /* BlogsAPIMock.swift in Sources */,
+				C2A7019E246BFC3E00144576 /* ArticlesViewModelMock.swift in Sources */,
+				C287C082246C36470051653A /* ArticlesViewControllerTest.swift in Sources */,
+				C2A701A2246BFEE500144576 /* ArticlesViewModelTest.swift in Sources */,
+				C2A701A4246C01E700144576 /* PendingOperationsMock.swift in Sources */,
+				C2A701A0246BFC4A00144576 /* ArticlesViewModelOutputMock.swift in Sources */,
+				C287C07E246C10780051653A /* CoreDataManagerMock.swift in Sources */,
+				C287C084246C40760051653A /* RPImageTest.swift in Sources */,
 				C274486124699D1B00DC57B6 /* Jet2TTTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -470,6 +525,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C274486C24699D1B00DC57B6 /* Jet2TTUITests.swift in Sources */,
+				C287C088246C44BE0051653A /* ArticlesViewControllerUITest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -619,13 +675,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Jet2TT/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.Jet2TT;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.-Jet2TT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -637,13 +694,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Jet2TT/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.Jet2TT;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.-Jet2TT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
