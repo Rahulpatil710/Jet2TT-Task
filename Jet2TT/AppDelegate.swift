@@ -20,7 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let pendingOperations = PendingOperations()
         let blogsAPI = BlogsAPI()
-        let articlesViewModel = ArticlesViewModel(blogsAPI, and: pendingOperations)
+        let coreDataManager = CoreDataManager.shared()
+        let articlesViewModel = ArticlesViewModel(blogsAPI, and: pendingOperations, with: coreDataManager)
         let articlesViewController = ArticlesViewController(articlesViewModel)
         articlesViewModel.output = articlesViewController
         let navigationViewController = UINavigationController(rootViewController: articlesViewController)

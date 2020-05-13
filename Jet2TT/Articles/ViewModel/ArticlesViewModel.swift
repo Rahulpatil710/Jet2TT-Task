@@ -21,7 +21,7 @@ protocol ArticlesViewModelInput {
     func tableViewWillBeginDragging()
     func tableViewDidEndDragging()
     
-    func onWillDisplayAtLastCell()
+    func scrollViewReachedAtMax()
     
     func loadImagesOnScreenVisibleCells(_ indexPaths: [IndexPath])
 }
@@ -37,7 +37,7 @@ class ArticlesViewModel: ArticlesViewModelInput {
     
     private let blogsAPI: BlogsNetworkProtocol!
     private var pendingOperations: PendingOperationsProtocol!
-    
+    private var coreDataManager: CoreDataManagerProtocol!
     weak var output:ArticlesViewModelOutput?
     
     fileprivate var blogItems = [BlogItem]()
@@ -47,9 +47,10 @@ class ArticlesViewModel: ArticlesViewModelInput {
     fileprivate var reachedMaxLimit: Bool = false
     private var isFetchInProgress = false
     
-    init(_ blogsAPI: BlogsNetworkProtocol, and pendingOperations: PendingOperationsProtocol ) {
+    init(_ blogsAPI: BlogsNetworkProtocol, and pendingOperations: PendingOperationsProtocol, with coreDataManager: CoreDataManagerProtocol) {
         self.blogsAPI = blogsAPI
         self.pendingOperations = pendingOperations
+        self.coreDataManager = coreDataManager
     }
     
     private func fetchBlogs() {
@@ -61,7 +62,7 @@ class ArticlesViewModel: ArticlesViewModelInput {
         }
         isFetchInProgress = true
 
-        let coreDataManager = CoreDataManager.shared()
+        
         let blogItems = coreDataManager.fetchBlogItems()
         if blogItems.count > 0, self.currentPage < blogItems.count/10 + 1 {
             self.currentPage = blogItems.count/10 + 1
@@ -174,7 +175,7 @@ class ArticlesViewModel: ArticlesViewModelInput {
         resumeAllOperations()
     }
     
-    func onWillDisplayAtLastCell() {
+    func scrollViewReachedAtMax() {
         fetchBlogs()
     }
     
