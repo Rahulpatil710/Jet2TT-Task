@@ -103,7 +103,7 @@ class ArticlesViewController: UIViewController {
                 let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: BlogTableViewCell.self), for: indexPath) as? BlogTableViewCell else { return UITableViewCell() }
             cell.layoutIfNeeded()
             cell.updateCell(blog)
-           
+            
             if let blogImage = self.viewModel.presentableBlogImage(at: indexPath.row) {
                 self.addImage(to: cell.profileImageView,
                               with: cell.profileActivityIndicator,
@@ -133,7 +133,7 @@ class ArticlesViewController: UIViewController {
             self.dataSource.apply(snapshot, animatingDifferences: true, completion: nil)
         }
     }
-        
+    
     private func addImage(to imageView: UIImageView,
                           with activityIndicator: UIActivityIndicatorView,
                           and blogImage: RPImage?,
@@ -145,6 +145,19 @@ class ArticlesViewController: UIViewController {
             case .new:
                 activityIndicator.startAnimating()
                 imageView.image = nil
+                
+                let isReachable = Reachability.shared.isConnectedToNetwork()
+                guard isReachable == true else {
+                    activityIndicator.stopAnimating()
+                    switch type {
+                    case .profile: imageView.image = UIImage(systemName: "person.circle.fill")
+                    case .media: imageView.image = UIImage(systemName: "film")
+                    }
+                    let action = UIAlertAction(title: "Ok", style: .default)
+                    displayAlert(with: "Warning" , message: "No internet connection", actions: [action])
+                    return
+                }
+                
                 // If collectionView is not scrolling then start download image
                 if !tableView.isDragging && !tableView.isDecelerating {
                     switch type {
@@ -176,7 +189,12 @@ class ArticlesViewController: UIViewController {
                     self.cache.insertImage(downsampledImage, for: image.url)
                 }
                 
-            case .failed:  activityIndicator.stopAnimating()
+            case .failed:
+                activityIndicator.stopAnimating()
+                switch type {
+                case .profile: imageView.image = UIImage(systemName: "person.circle.fill")
+                case .media: imageView.image = UIImage(systemName: "film")
+                }
             }
         }
     }
@@ -243,10 +261,8 @@ extension ArticlesViewController: ArticlesViewModelOutput, AlertDisplayer {
     
     func onFetchFailed(with reason: String) {
         indicatorView.stopAnimating()
-        
-        let title = "Warning"
         let action = UIAlertAction(title: "Ok", style: .default)
-        displayAlert(with: title , message: reason, actions: [action])
+        displayAlert(with: "Warning" , message: reason, actions: [action])
     }
     
     func tableViewReloadItemsAt(_ indexPaths: [IndexPath]) {

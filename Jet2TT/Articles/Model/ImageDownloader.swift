@@ -17,6 +17,10 @@ class ImageDownloader: Operation {
     }
     
     override func main() {
+        let isReachable = Reachability.shared.isConnectedToNetwork()
+        guard isReachable == true else {
+            return
+        }
         if isCancelled {
             return
         }
