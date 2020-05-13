@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C2501B7B246BBDAB0044713D /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2501B7A246BBDAB0044713D /* Reachability.swift */; };
 		C274484724699D1500DC57B6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C274484624699D1500DC57B6 /* AppDelegate.swift */; };
 		C274485124699D1500DC57B6 /* Jet2TT.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C274484F24699D1500DC57B6 /* Jet2TT.xcdatamodeld */; };
 		C274485324699D1B00DC57B6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C274485224699D1B00DC57B6 /* Assets.xcassets */; };
@@ -52,6 +53,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C2501B7A246BBDAB0044713D /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		C274484324699D1500DC57B6 /* Jet2TT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jet2TT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C274484624699D1500DC57B6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C274485024699D1500DC57B6 /* Jet2TT.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Jet2TT.xcdatamodel; sourceTree = "<group>"; };
@@ -110,6 +112,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C2501B79246BBD930044713D /* Reachability */ = {
+			isa = PBXGroup;
+			children = (
+				C2501B7A246BBDAB0044713D /* Reachability.swift */,
+			);
+			path = Reachability;
+			sourceTree = "<group>";
+		};
 		C274483A24699D1500DC57B6 = {
 			isa = PBXGroup;
 			children = (
@@ -252,6 +262,7 @@
 		C274489B2469F3AB00DC57B6 /* InternalFunctionality */ = {
 			isa = PBXGroup;
 			children = (
+				C2501B79246BBD930044713D /* Reachability */,
 				C274489C2469F3AB00DC57B6 /* ImageCache */,
 			);
 			path = InternalFunctionality;
@@ -436,6 +447,7 @@
 				C274484724699D1500DC57B6 /* AppDelegate.swift in Sources */,
 				C29D1E82246B2C9C00689E47 /* BlogItem+CoreDataClass.swift in Sources */,
 				C2D0D4DE246A7E540063F26A /* DataResponseError.swift in Sources */,
+				C2501B7B246BBDAB0044713D /* Reachability.swift in Sources */,
 				C27448962469CECF00DC57B6 /* BlogTableViewCell.swift in Sources */,
 				C274488D2469BEAD00DC57B6 /* BlogsAPI.swift in Sources */,
 				C274489E2469F3AB00DC57B6 /* Image.swift in Sources */,

@@ -15,6 +15,11 @@ protocol BlogsNetworkProtocol {
 class BlogsAPI: BlogsNetworkProtocol {
     
     func fetchBlogs(_ page: Int, completion: @escaping(Result<Blogs, DataResponseError>) -> Void) {
+        let isReachable = Reachability.shared.isConnectedToNetwork()
+        guard isReachable == true else {
+            completion(.failure(.noConnection))
+            return
+        }
         let strUrl = "https://5e99a9b1bc561b0016af3540.mockapi.io/jet2/api/v1/blogs?page=\(page)&limit=10"
         guard let url = URL(string: strUrl) else { return }
         let task = URLSession.shared.dataTask(with: url) { (data, response, error) in

@@ -60,7 +60,7 @@ class ArticlesViewModel: ArticlesViewModelInput {
             return
         }
         isFetchInProgress = true
-        
+
         let coreDataManager = CoreDataManager.shared()
         let blogItems = coreDataManager.fetchBlogItems()
         if blogItems.count > 0, self.currentPage < blogItems.count/10 + 1 {
